@@ -1,4 +1,4 @@
-/* eslint-disable no-use-before-define */
+// /* eslint-disable no-use-before-define */
 
 var bCrypt = require('bcrypt-nodejs');
 
@@ -120,4 +120,39 @@ module.exports = function(passport, user) {
 //     };
 
 //   }
+// ));
+
+// const LocalStrategy = require('passport-local').Strategy
+// const Users = require('./database/index.js').User
+// module.exports = function(passport)
+// {
+//     console.log("passport is up and running!");
+// passport.serializeUser(function (users, done) {
+//     return done(null, users.id);
+//     console.log("Serialize");
+
+// })
+
+// passport.deserializeUser(function (id, done) {
+//     console.log("DeSerialize");
+//     Users.findById(id).then((users) => {
+//         console.log(users);
+//         return done(null, users);
+//     });
+// })
+
+// passport.use(new LocalStrategy(
+//     function (username, password, done) {
+//         Users.findOne({ where: { username: username } })
+//              .then(function (users) {
+//                  if (!users) {
+//                      return done(null, false, { message: 'Incorrect username.' });
+//                  }
+//                  if (!users.password === password) {
+//                      return done(null, false, { message: 'Incorrect password.' });
+//                  }
+//                  return done(null, users);
+//              })
+//              .catch(err => done(err));
+//     }
 // ));

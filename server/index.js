@@ -5,16 +5,18 @@ const path = require('path');
 const passport = require('passport');
 const db = require('../database/index.js');
 const env = require('dotenv').config();
+const passportLocal = require('passport-local');
 // const exphbs = require('express-handlebars');
 
 const PORT = process.env.PORT || 3000;
 
 const app = express();
+const cookieparser = require('cookie-parser')
+// const models = require("../database/models");
+// const authRoute = require('../database/passport_routes/auth.js')(app,passport);
+// const passportStrat = require('../database/passport/passport.js')(passport, models.user);
 
-const models = require("../database/models");
-const authRoute = require('../database/passport_routes/auth.js')(app,passport);
-const passportStrat = require('../database/config/passport/passport.js')(passport, models.user);
-
+const dbPassport = require('../database/passport/')(passport);
 
 app.set('view engine', 'jade');
 
@@ -24,7 +26,11 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 // for parsing application/x-www-form-urlencode app.use(multer());
 // for parsing multipart/form-data
-
+app.use(session({
+    secret: 'session',
+    resave: true,
+    saveUninitialized:true
+}))
 // initialize passport and the express sessions and passport sessions
 app.use(passport.initialize());
 app.use(passport.session()); // persistent login sessions
@@ -73,21 +79,67 @@ app.get('/search', (req, res) => {
   res.redirect('localhost:3000/search');
 });
 
+
+
+
+ app.get('/signup', function(req,res) {
+     res.render('');
+ })
+ app.get('/login',function(req,res){
+     res.send({
+         username: req.body.username
+     })
+ })
+
+app.post('/signUpView', function(req,res){
+    var a = [req.body.email,req.body.username,req.body.password];
+    Users.findOne({
+       where: { email: a[0],
+        username: a[1],
+        password: a[2],
+       }
+
+    }).then(users => {
+        if (users) {
+        res.send({
+            url:'/loginView'
+        })
+      }
+      else{
+          Users.create({
+            email: a[0],
+            username: a[1],
+            password: a[2],
+
+        }).then(users => {
+            res.send({
+            url:'/login',
+            username: a[1]
+        })
+      })
+    }
+  })
+})
+app.post('/login', passport.authenticate('local'),
+function(req, res) {
+    res.send({
+        url:'/login',
+        username:req.body.username
+    });
+  });
+
+app.get('/logout', function(req, res){
+    req.logout();
+    res.redirect('/');
+  });
 //Synced to roomee database
-models.sequelize.sync()
+models.sequelize.authenticate()
 .then(function() {
    console.log('Database is working!')
 })
 .catch(function(err) {
     console.log(err, "Database isn't working!")
 });
-
-//Handlebars for the views
-// app.set('views', './database/passport_views')
-// app.engine('hbs', exphbs({
-//     extname: '.hbs'
-// }));
-// app.set('view engine', '.hbs');
 
 app.listen(PORT, () => {
   console.log(`Listening on port ${PORT}!`);
